@@ -18,8 +18,9 @@ typedef struct test_spi_writer_t
     size_t last_size;
 } test_spi_writer_t;
 
-void test_spi_writer_write(ad8400_ad8402_ad8403_spi_writer_t *parent, uint8_t data[], size_t size)
+ad8400_ad8402_ad8403_error_t test_spi_writer_write(ad8400_ad8402_ad8403_spi_writer_t *parent, uint8_t data[], size_t size)
 {
+    assert(parent != NULL);
     assert(size < TEST_SPI_SIZE);
     test_spi_writer_t *writer = (test_spi_writer_t *)parent;
     for (size_t i = 0; i < size; i++)
@@ -27,6 +28,7 @@ void test_spi_writer_write(ad8400_ad8402_ad8403_spi_writer_t *parent, uint8_t da
         writer->last_data[i] = data[i];
     }
     writer->last_size = size;
+    return AD8400_AD8402_AD8403_OK;
 }
 
 #define test_spi_writer_init(writer) ((writer)->parent.write = test_spi_writer_write, \
@@ -45,8 +47,40 @@ bool test_spi_data_equals(uint8_t arr0[], uint8_t arr1[], size_t size)
     return true;
 }
 
-void test_null_gpio_set(ad8400_ad8402_ad8403_gpio_t *_)
+ad8400_ad8402_ad8403_error_t test_null_gpio_set(ad8400_ad8402_ad8403_gpio_t *gpio)
 {
+    assert(gpio != NULL);
+    return AD8400_AD8402_AD8403_OK;
 }
+
+typedef enum test_gpio_state_t
+{
+    TEST_GPIO_HIGH,
+    TEST_GPIO_LOW,
+} test_gpio_state_t;
+
+typedef struct test_gpio_t
+{
+    ad8400_ad8402_ad8403_gpio_t parent;
+    test_gpio_state_t state;
+} test_gpio_t;
+
+ad8400_ad8402_ad8403_error_t test_gpio_set_high(ad8400_ad8402_ad8403_gpio_t *gpio)
+{
+    assert(gpio != NULL);
+    ((test_gpio_t *)gpio)->state = TEST_GPIO_HIGH;
+    return AD8400_AD8402_AD8403_OK;
+}
+
+ad8400_ad8402_ad8403_error_t test_gpio_set_low(ad8400_ad8402_ad8403_gpio_t *gpio)
+{
+    assert(gpio != NULL);
+    ((test_gpio_t *)gpio)->state = TEST_GPIO_LOW;
+    return AD8400_AD8402_AD8403_OK;
+}
+
+#define test_gpio_init(gpio) ((gpio)->parent.set_high = test_gpio_set_high, \
+                              (gpio)->parent.set_low = test_gpio_set_low,   \
+                              (void)0)
 
 #endif // TEST_H_

@@ -9,15 +9,21 @@ extern "C"
 #include <stddef.h>
 #include <stdint.h>
 
+    typedef int ad8400_ad8402_ad8403_error_t;
+
+#define AD8400_AD8402_AD8403_OK ((int)0)
+#define AD8400_AD8402_AD8403_EIO ((int)5)
+#define AD8400_AD8402_AD8403_EINVAL ((int)22)
+
     typedef struct ad8400_ad8402_ad8403_spi_writer_t
     {
-        void (*write)(struct ad8400_ad8402_ad8403_spi_writer_t *writer, uint8_t data[], size_t size);
+        ad8400_ad8402_ad8403_error_t (*write)(struct ad8400_ad8402_ad8403_spi_writer_t *writer, uint8_t data[], size_t size);
     } ad8400_ad8402_ad8403_spi_writer_t;
 
     typedef struct ad8400_ad8402_ad8403_gpio_t
     {
-        void (*set_high)(struct ad8400_ad8402_ad8403_gpio_t *gpio);
-        void (*set_low)(struct ad8400_ad8402_ad8403_gpio_t *gpio);
+        ad8400_ad8402_ad8403_error_t (*set_high)(struct ad8400_ad8402_ad8403_gpio_t *gpio);
+        ad8400_ad8402_ad8403_error_t (*set_low)(struct ad8400_ad8402_ad8403_gpio_t *gpio);
     } ad8400_ad8402_ad8403_gpio_t;
 
     typedef struct ad8400_ad8402_ad8403_t
@@ -25,12 +31,6 @@ extern "C"
         ad8400_ad8402_ad8403_spi_writer_t *_writer;
         ad8400_ad8402_ad8403_gpio_t *_shdn;
     } ad8400_ad8402_ad8403_t;
-
-    typedef enum ad8400_ad8402_ad8403_error_t
-    {
-        AD8400_AD8402_AD8403_OK = 0,
-        AD8400_AD8402_AD8403_EINVAL = 22
-    } ad8400_ad8402_ad8403_error_t;
 
     typedef enum ad8400_ad8402_ad8403_address_t
     {
