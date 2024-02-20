@@ -76,6 +76,9 @@ int test_set(void)
 {
     int cnt = 0;
 
+    // Nothing is expected to happen.
+    assert(ad8400_ad8402_ad8403_set(NULL, AD8400_AD8402_AD8403_RDAC1, 0) == AD8400_AD8402_AD8403_EINVAL);
+
     typedef struct test_case_t
     {
         ad8400_ad8402_ad8403_address_t addr;
@@ -102,9 +105,6 @@ int test_set(void)
                            {.addr = AD8400_AD8402_AD8403_RDAC4, .data = 255, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______11'11111111 */ 0x03, 0xFF}, .expected_size = 2},
                            {.addr = 255, /*                  */ .data = 255, /**/ .expected_ret = AD8400_AD8402_AD8403_EINVAL}};
     size_t size = sizeof(cases) / sizeof(test_case_t);
-
-    // Nothing is expected to happen.
-    assert(ad8400_ad8402_ad8403_set(NULL, AD8400_AD8402_AD8403_RDAC1, 0) == AD8400_AD8402_AD8403_EINVAL);
 
     for (size_t i = 0; i < size; i++)
     {
@@ -160,6 +160,90 @@ int test_set(void)
     return cnt;
 }
 
+int test_enter_shutdown_mode(void)
+{
+    int cnt = 0;
+
+    // Nothing is expected to happen.
+    assert(ad8400_ad8402_ad8403_enter_shutdown_mode(NULL) == AD8400_AD8402_AD8403_EINVAL);
+
+    ad8400_ad8402_ad8403_error_t expected_ret = AD8400_AD8402_AD8403_OK;
+    test_gpio_state_t expected_state = TEST_GPIO_LOW;
+
+    ad8400_ad8402_ad8403_t ad8400_ad8402_ad8403;
+    ad8400_ad8402_ad8403_spi_writer_t writer;
+    writer.write = test_null_spi_writer_write;
+    test_gpio_t shdn;
+    test_gpio_init(&shdn);
+    assert(ad8400_ad8402_ad8403_init(&ad8400_ad8402_ad8403, (ad8400_ad8402_ad8403_spi_writer_t *)&writer, (ad8400_ad8402_ad8403_gpio_t *)&shdn) == AD8400_AD8402_AD8403_OK);
+
+    ad8400_ad8402_ad8403_error_t actual_ret = ad8400_ad8402_ad8403_enter_shutdown_mode(&ad8400_ad8402_ad8403);
+    if (expected_ret != actual_ret)
+    {
+        fprintf(stderr, "index: %d, expected_ret: %s, actual_ret: %s\n",
+                0, TEST_AD8400_AD8402_AD8403_ERROR(expected_ret), TEST_AD8400_AD8402_AD8403_ERROR(actual_ret));
+        cnt++;
+        return cnt;
+    }
+    if (actual_ret != AD8400_AD8402_AD8403_OK)
+    {
+        return cnt;
+    }
+
+    test_gpio_state_t actual_state = shdn.state;
+    if (expected_state != actual_state)
+    {
+        fprintf(stderr, "index: %d, expected_state: %s, actual_state: %s\n",
+                0, TEST_GPIO_STATE(expected_state), TEST_GPIO_STATE(actual_state));
+        cnt++;
+        return cnt;
+    }
+
+    return cnt;
+}
+
+int test_enter_operational_mode(void)
+{
+    int cnt = 0;
+
+    // Nothing is expected to happen.
+    assert(ad8400_ad8402_ad8403_enter_operational_mode(NULL) == AD8400_AD8402_AD8403_EINVAL);
+
+    ad8400_ad8402_ad8403_error_t expected_ret = AD8400_AD8402_AD8403_OK;
+    test_gpio_state_t expected_state = TEST_GPIO_HIGH;
+
+    ad8400_ad8402_ad8403_t ad8400_ad8402_ad8403;
+    ad8400_ad8402_ad8403_spi_writer_t writer;
+    writer.write = test_null_spi_writer_write;
+    test_gpio_t shdn;
+    test_gpio_init(&shdn);
+    assert(ad8400_ad8402_ad8403_init(&ad8400_ad8402_ad8403, (ad8400_ad8402_ad8403_spi_writer_t *)&writer, (ad8400_ad8402_ad8403_gpio_t *)&shdn) == AD8400_AD8402_AD8403_OK);
+
+    ad8400_ad8402_ad8403_error_t actual_ret = ad8400_ad8402_ad8403_enter_operational_mode(&ad8400_ad8402_ad8403);
+    if (expected_ret != actual_ret)
+    {
+        fprintf(stderr, "index: %d, expected_ret: %s, actual_ret: %s\n",
+                0, TEST_AD8400_AD8402_AD8403_ERROR(expected_ret), TEST_AD8400_AD8402_AD8403_ERROR(actual_ret));
+        cnt++;
+        return cnt;
+    }
+    if (actual_ret != AD8400_AD8402_AD8403_OK)
+    {
+        return cnt;
+    }
+
+    test_gpio_state_t actual_state = shdn.state;
+    if (expected_state != actual_state)
+    {
+        fprintf(stderr, "index: %d, expected_state: %s, actual_state: %s\n",
+                0, TEST_GPIO_STATE(expected_state), TEST_GPIO_STATE(actual_state));
+        cnt++;
+        return cnt;
+    }
+
+    return cnt;
+}
+
 int main(void)
 {
     int cnt = 0;
@@ -168,6 +252,10 @@ int main(void)
     cnt += test_init();
     printf("* test_set\n");
     cnt += test_set();
+    printf("* test_enter_shutdown_mode\n");
+    cnt += test_enter_shutdown_mode();
+    printf("* test_enter_operational_mode\n");
+    cnt += test_enter_operational_mode();
 
     if (cnt == 0)
     {

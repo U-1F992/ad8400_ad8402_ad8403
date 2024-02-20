@@ -9,6 +9,12 @@
 #define TEST_AD8400_AD8402_AD8403_ERROR(err) ((err) == AD8400_AD8402_AD8403_EINVAL ? "AD8400_AD8402_AD8403_EINVAL" \
                                                                                    : "AD8400_AD8402_AD8403_OK")
 
+ad8400_ad8402_ad8403_error_t test_null_spi_writer_write(ad8400_ad8402_ad8403_spi_writer_t *writer, uint8_t data[], size_t size)
+{
+    assert(writer != NULL);
+    return AD8400_AD8402_AD8403_OK;
+}
+
 #define TEST_SPI_SIZE ((size_t)8)
 
 typedef struct test_spi_writer_t
@@ -58,6 +64,9 @@ typedef enum test_gpio_state_t
     TEST_GPIO_HIGH,
     TEST_GPIO_LOW,
 } test_gpio_state_t;
+
+#define TEST_GPIO_STATE(state) ((state) == TEST_GPIO_HIGH ? "TEST_GPIO_HIGH" \
+                                                          : "TEST_GPIO_LOW")
 
 typedef struct test_gpio_t
 {
