@@ -6,48 +6,93 @@
 #include <ad8400_ad8402_ad8403.h>
 
 #include <Arduino.h>
-#include <Wire.h>
+#include <SPI.h>
 
 class AD8400_AD8402_AD8403
 {
 public:
-    AD8400_AD8402_AD8403(HardwareI2C *wire)
+    AD8400_AD8402_AD8403(HardwareSPI *spi, pin_size_t cs, pin_size_t shdn)
     {
-        writer_.parent.write = [](ad8400_ad8402_ad8403_i2c_writer_t *parent, uint8_t data[], size_t size)
+        writer_.parent.write = [](ad8400_ad8402_ad8403_spi_writer_t *parent, uint8_t data[], size_t size)
         {
-            _Writer *writer = (_Writer *)parent;
+            Writer_ *writer = (Writer_ *)parent;
             if (writer == NULL)
             {
-                return;
+                return AD8400_AD8402_AD8403_EINVAL;
             }
 
-            writer->_wire->beginTransmission(AD8400_AD8402_AD8403_SLAVE_ADDRESS);
-            for (size_t i = 0; i < size; i++)
-            {
-                writer->_wire->write(data[i]);
-            }
-            writer->_wire->endTransmission();
+            digitalWrite(writer->cs_, LOW);
+            writer->spi_->transfer(data, size);
+            digitalWrite(writer->cs_, HIGH);
+
+            return AD8400_AD8402_AD8403_OK;
         };
-        writer_._wire = wire;
+        writer_.spi_ = spi;
+        writer_.cs_ = cs;
 
-        ad8400_ad8402_ad8403_init(&_ad8400_ad8402_ad8403, (ad8400_ad8402_ad8403_i2c_writer_t *)&writer_);
+        shdn_.parent.set_high = [](ad8400_ad8402_ad8403_gpio_t *parent)
+        {
+            GPIO_ *gpio = (GPIO_ *)parent;
+            if (gpio == NULL)
+            {
+                return AD8400_AD8402_AD8403_EINVAL;
+            }
+
+            digitalWrite(gpio->pin_, HIGH);
+
+            return AD8400_AD8402_AD8403_OK;
+        };
+        shdn_.parent.set_low = [](ad8400_ad8402_ad8403_gpio_t *parent)
+        {
+            GPIO_ *gpio = (GPIO_ *)parent;
+            if (gpio == NULL)
+            {
+                return AD8400_AD8402_AD8403_EINVAL;
+            }
+
+            digitalWrite(gpio->pin_, LOW);
+
+            return AD8400_AD8402_AD8403_OK;
+        };
+        shdn_.pin_ = shdn;
+
+        ad8400_ad8402_ad8403_init(&ad8400_ad8402_ad8403_, (ad8400_ad8402_ad8403_spi_writer_t *)&writer_, (ad8400_ad8402_ad8403_gpio_t *)&shdn_);
     }
 
-    ad8400_ad8402_ad8403_error_t set(ad8400_ad8402_ad8403_memory_address_t addr, ad8400_ad8402_ad8403_sign_bit_t sign, uint8_t data)
+    ad8400_ad8402_ad8403_error_t set(ad8400_ad8402_ad8403_address_t addr, uint8_t data)
     {
-        return ad8400_ad8402_ad8403_set(&_ad8400_ad8402_ad8403, addr, sign, data);
+        return ad8400_ad8402_ad8403_set(&ad8400_ad8402_ad8403_, addr, data);
+    }
+
+    ad8400_ad8402_ad8403_error_t enterShutdownMode()
+    {
+        return ad8400_ad8402_ad8403_enter_shutdown_mode(&ad8400_ad8402_ad8403_);
+    }
+
+    ad8400_ad8402_ad8403_error_t enterOperationalMode()
+    {
+        return ad8400_ad8402_ad8403_enter_operational_mode(&ad8400_ad8402_ad8403_);
     }
 
 private:
-    ad8400_ad8402_ad8403_t _ad8400_ad8402_ad8403;
+    ad8400_ad8402_ad8403_t ad8400_ad8402_ad8403_;
 
-    struct _Writer
+    struct Writer_
     {
-        ad8400_ad8402_ad8403_i2c_writer_t parent;
-        HardwareI2C *_wire;
+        ad8400_ad8402_ad8403_spi_writer_t parent;
+        HardwareSPI *spi_;
+        pin_size_t cs_;
     };
 
-    _Writer writer_;
+    Writer_ writer_;
+
+    struct GPIO_
+    {
+        ad8400_ad8402_ad8403_gpio_t parent;
+        pin_size_t pin_;
+    };
+
+    GPIO_ shdn_;
 };
 
 #endif // AD8400_AD8402_AD8403_ARDUINO_H_
