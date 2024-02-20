@@ -13,7 +13,7 @@ class AD8400_AD8402_AD8403
 public:
     AD8400_AD8402_AD8403(HardwareI2C *wire)
     {
-        _writer.parent.write = [](ad8400_ad8402_ad8403_i2c_writer_t *parent, uint8_t data[], size_t size)
+        writer_.parent.write = [](ad8400_ad8402_ad8403_i2c_writer_t *parent, uint8_t data[], size_t size)
         {
             _Writer *writer = (_Writer *)parent;
             if (writer == NULL)
@@ -28,9 +28,9 @@ public:
             }
             writer->_wire->endTransmission();
         };
-        _writer._wire = wire;
+        writer_._wire = wire;
 
-        ad8400_ad8402_ad8403_init(&_ad8400_ad8402_ad8403, (ad8400_ad8402_ad8403_i2c_writer_t *)&_writer);
+        ad8400_ad8402_ad8403_init(&_ad8400_ad8402_ad8403, (ad8400_ad8402_ad8403_i2c_writer_t *)&writer_);
     }
 
     ad8400_ad8402_ad8403_error_t set(ad8400_ad8402_ad8403_memory_address_t addr, ad8400_ad8402_ad8403_sign_bit_t sign, uint8_t data)
@@ -47,7 +47,7 @@ private:
         HardwareI2C *_wire;
     };
 
-    _Writer _writer;
+    _Writer writer_;
 };
 
 #endif // AD8400_AD8402_AD8403_ARDUINO_H_

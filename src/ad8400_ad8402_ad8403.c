@@ -9,8 +9,8 @@ ad8400_ad8402_ad8403_error_t ad8400_ad8402_ad8403_init(ad8400_ad8402_ad8403_t *a
         return AD8400_AD8402_AD8403_EINVAL;
     }
 
-    ad8400_ad8402_ad8403->_writer = writer;
-    ad8400_ad8402_ad8403->_shdn = shdn;
+    ad8400_ad8402_ad8403->writer_ = writer;
+    ad8400_ad8402_ad8403->shdn_ = shdn;
 
     return AD8400_AD8402_AD8403_OK;
 }
@@ -26,7 +26,7 @@ ad8400_ad8402_ad8403_error_t ad8400_ad8402_ad8403_set(ad8400_ad8402_ad8403_t *ad
         return AD8400_AD8402_AD8403_EINVAL;
     }
 
-    return ad8400_ad8402_ad8403->_writer->write(ad8400_ad8402_ad8403->_writer,
+    return ad8400_ad8402_ad8403->writer_->write(ad8400_ad8402_ad8403->writer_,
                                                 (uint8_t[]){(uint8_t)addr,
                                                             data},
                                                 2);
@@ -39,7 +39,7 @@ ad8400_ad8402_ad8403_error_t ad8400_ad8402_ad8403_enter_shutdown_mode(ad8400_ad8
         return AD8400_AD8402_AD8403_EINVAL;
     }
 
-    return ad8400_ad8402_ad8403->_shdn->set_low(ad8400_ad8402_ad8403->_shdn);
+    return ad8400_ad8402_ad8403->shdn_->set_low(ad8400_ad8402_ad8403->shdn_);
 }
 
 ad8400_ad8402_ad8403_error_t ad8400_ad8402_ad8403_enter_operational_mode(ad8400_ad8402_ad8403_t *ad8400_ad8402_ad8403)
@@ -49,5 +49,5 @@ ad8400_ad8402_ad8403_error_t ad8400_ad8402_ad8403_enter_operational_mode(ad8400_
         return AD8400_AD8402_AD8403_EINVAL;
     }
 
-    return ad8400_ad8402_ad8403->_shdn->set_high(ad8400_ad8402_ad8403->_shdn);
+    return ad8400_ad8402_ad8403->shdn_->set_high(ad8400_ad8402_ad8403->shdn_);
 }

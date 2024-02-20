@@ -50,7 +50,7 @@ int test_init(void)
             continue;
         }
 
-        ad8400_ad8402_ad8403_spi_writer_t *actual_writer = case_.ad8400_ad8402_ad8403->_writer;
+        ad8400_ad8402_ad8403_spi_writer_t *actual_writer = case_.ad8400_ad8402_ad8403->writer_;
         if (case_.expected_writer != actual_writer)
         {
             fprintf(stderr, "index: %d, expected_writer: %#x, actual_writer: %#x\n",
@@ -59,7 +59,7 @@ int test_init(void)
             continue;
         }
 
-        ad8400_ad8402_ad8403_gpio_t *actual_shdn = case_.ad8400_ad8402_ad8403->_shdn;
+        ad8400_ad8402_ad8403_gpio_t *actual_shdn = case_.ad8400_ad8402_ad8403->shdn_;
         if (case_.expected_shdn != actual_shdn)
         {
             fprintf(stderr, "index: %d, expected_shdn: %#x, actual_shdn: %#x\n",

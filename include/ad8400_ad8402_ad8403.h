@@ -28,8 +28,8 @@ extern "C"
 
     typedef struct ad8400_ad8402_ad8403_t
     {
-        ad8400_ad8402_ad8403_spi_writer_t *_writer;
-        ad8400_ad8402_ad8403_gpio_t *_shdn;
+        ad8400_ad8402_ad8403_spi_writer_t *writer_;
+        ad8400_ad8402_ad8403_gpio_t *shdn_;
     } ad8400_ad8402_ad8403_t;
 
     typedef enum ad8400_ad8402_ad8403_address_t
