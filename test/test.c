@@ -6,155 +6,241 @@
 
 int test_init(void)
 {
+    printf("* %s\n", __func__);
     int cnt = 0;
 
-    typedef struct test_case_t
+    typedef struct TestCase
     {
-        ad8400_ad8402_ad8403_t *ad8400_ad8402_ad8403;
-        ad8400_ad8402_ad8403_spi_writer_t *writer;
-        ad8400_ad8402_ad8403_gpio_t *shdn;
+        AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403;
+        AD8400_AD8402_AD8403SPIWriter *writer;
+        AD8400_AD8402_AD8403GPIO *shdn;
 
-        ad8400_ad8402_ad8403_error_t expected_ret;
-        ad8400_ad8402_ad8403_spi_writer_t *expected_writer;
-        ad8400_ad8402_ad8403_gpio_t *expected_shdn;
-    } test_case_t;
+        AD8400_AD8402_AD8403ErrNo expected_ret;
+        AD8400_AD8402_AD8403SPIWriter *expected_writer;
+        AD8400_AD8402_AD8403GPIO *expected_shdn;
+    } TestCase;
 
-    ad8400_ad8402_ad8403_t ad8400_ad8402_ad8403[8];
-    ad8400_ad8402_ad8403_spi_writer_t writer[8];
-    ad8400_ad8402_ad8403_gpio_t shdn[8];
+    AD8400_AD8402_AD8403 ad8400_ad8402_ad8403[8];
+    AD8400_AD8402_AD8403SPIWriter writer[8];
+    AD8400_AD8402_AD8403GPIO shdn[8];
 
-    test_case_t cases[] = {{.ad8400_ad8402_ad8403 = NULL, /*               */ .writer = NULL, /* */ .shdn = NULL, /*    */ .expected_ret = AD8400_AD8402_AD8403_EINVAL},
-                           {.ad8400_ad8402_ad8403 = &ad8400_ad8402_ad8403[1], .writer = NULL, /* */ .shdn = NULL, /*    */ .expected_ret = AD8400_AD8402_AD8403_EINVAL},
-                           {.ad8400_ad8402_ad8403 = NULL, /*               */ .writer = &writer[2], .shdn = NULL, /*    */ .expected_ret = AD8400_AD8402_AD8403_EINVAL},
-                           {.ad8400_ad8402_ad8403 = &ad8400_ad8402_ad8403[3], .writer = &writer[3], .shdn = NULL, /*    */ .expected_ret = AD8400_AD8402_AD8403_EINVAL},
-                           {.ad8400_ad8402_ad8403 = NULL, /*               */ .writer = NULL, /* */ .shdn = &shdn[4], /**/ .expected_ret = AD8400_AD8402_AD8403_EINVAL},
-                           {.ad8400_ad8402_ad8403 = &ad8400_ad8402_ad8403[5], .writer = NULL, /* */ .shdn = &shdn[5], /**/ .expected_ret = AD8400_AD8402_AD8403_EINVAL},
-                           {.ad8400_ad8402_ad8403 = NULL, /*               */ .writer = &writer[6], .shdn = &shdn[6], /**/ .expected_ret = AD8400_AD8402_AD8403_EINVAL},
-                           {.ad8400_ad8402_ad8403 = &ad8400_ad8402_ad8403[7], .writer = &writer[7], .shdn = &shdn[7], /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_writer = &writer[7], .expected_shdn = &shdn[7]}};
-    size_t size = sizeof(cases) / sizeof(test_case_t);
+    TestCase cases[] = {{.ad8400_ad8402_ad8403 = NULL, /*               */ .writer = NULL, /* */ .shdn = NULL, /*    */ .expected_ret = AD8400_AD8402_AD8403_EINVAL},
+                        {.ad8400_ad8402_ad8403 = &ad8400_ad8402_ad8403[1], .writer = NULL, /* */ .shdn = NULL, /*    */ .expected_ret = AD8400_AD8402_AD8403_EINVAL},
+                        {.ad8400_ad8402_ad8403 = NULL, /*               */ .writer = &writer[2], .shdn = NULL, /*    */ .expected_ret = AD8400_AD8402_AD8403_EINVAL},
+                        {.ad8400_ad8402_ad8403 = &ad8400_ad8402_ad8403[3], .writer = &writer[3], .shdn = NULL, /*    */ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_writer = &writer[3], .expected_shdn = NULL},
+                        {.ad8400_ad8402_ad8403 = NULL, /*               */ .writer = NULL, /* */ .shdn = &shdn[4], /**/ .expected_ret = AD8400_AD8402_AD8403_EINVAL},
+                        {.ad8400_ad8402_ad8403 = &ad8400_ad8402_ad8403[5], .writer = NULL, /* */ .shdn = &shdn[5], /**/ .expected_ret = AD8400_AD8402_AD8403_EINVAL},
+                        {.ad8400_ad8402_ad8403 = NULL, /*               */ .writer = &writer[6], .shdn = &shdn[6], /**/ .expected_ret = AD8400_AD8402_AD8403_EINVAL},
+                        {.ad8400_ad8402_ad8403 = &ad8400_ad8402_ad8403[7], .writer = &writer[7], .shdn = &shdn[7], /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_writer = &writer[7], .expected_shdn = &shdn[7]}};
 
-    for (size_t i = 0; i < size; i++)
+    TEST_FOR(cases)
     {
-        test_case_t case_ = cases[i];
-
-        ad8400_ad8402_ad8403_error_t actual_ret = ad8400_ad8402_ad8403_init(case_.ad8400_ad8402_ad8403, case_.writer, case_.shdn);
-        if (case_.expected_ret != actual_ret)
-        {
-            fprintf(stderr, "index: %d, expected_ret: %s, actual_ret: %s\n",
-                    i, TEST_AD8400_AD8402_AD8403_ERROR(case_.expected_ret), TEST_AD8400_AD8402_AD8403_ERROR(actual_ret));
-            cnt++;
-            continue;
-        }
+        AD8400_AD8402_AD8403ErrNo actual_ret = ad8400_ad8402_ad8403_init(case_.ad8400_ad8402_ad8403, case_.writer, case_.shdn);
+        TEST_ASSERT_EQUAL_AD8400_AD8402_AD8403_ERROR_RET(case_.expected_ret, actual_ret);
         if (actual_ret != AD8400_AD8402_AD8403_OK)
         {
             continue;
         }
 
-        ad8400_ad8402_ad8403_spi_writer_t *actual_writer = case_.ad8400_ad8402_ad8403->writer_;
+        AD8400_AD8402_AD8403SPIWriter *actual_writer = case_.ad8400_ad8402_ad8403->writer;
         if (case_.expected_writer != actual_writer)
         {
             fprintf(stderr, "index: %d, expected_writer: %#x, actual_writer: %#x\n",
                     i, case_.expected_writer, actual_writer);
             cnt++;
-            continue;
         }
 
-        ad8400_ad8402_ad8403_gpio_t *actual_shdn = case_.ad8400_ad8402_ad8403->shdn_;
+        AD8400_AD8402_AD8403GPIO *actual_shdn = case_.ad8400_ad8402_ad8403->shdn;
         if (case_.expected_shdn != actual_shdn)
         {
             fprintf(stderr, "index: %d, expected_shdn: %#x, actual_shdn: %#x\n",
                     i, case_.expected_shdn, actual_shdn);
             cnt++;
-            continue;
         }
     }
 
     return cnt;
 }
 
-int test_set(void)
+int test_set_rdac1(void)
 {
+    printf("* %s\n", __func__);
     int cnt = 0;
 
-    // Nothing is expected to happen.
-    assert(ad8400_ad8402_ad8403_set(NULL, AD8400_AD8402_AD8403_RDAC1, 0) == AD8400_AD8402_AD8403_EINVAL);
-
-    typedef struct test_case_t
+    typedef struct TestCase
     {
-        ad8400_ad8402_ad8403_address_t addr;
         uint8_t data;
 
-        ad8400_ad8402_ad8403_error_t expected_ret;
+        AD8400_AD8402_AD8403ErrNo expected_ret;
         uint8_t *expected_data;
         size_t expected_size;
-    } test_case_t;
+    } TestCase;
 
-    test_case_t cases[] = {{.addr = AD8400_AD8402_AD8403_RDAC1, .data = 0, /*  */ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______00'00000000 */ 0x00, 0x00}, .expected_size = 2},
-                           {.addr = AD8400_AD8402_AD8403_RDAC2, .data = 0, /*  */ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______01'00000000 */ 0x01, 0x00}, .expected_size = 2},
-                           {.addr = AD8400_AD8402_AD8403_RDAC3, .data = 0, /*  */ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______10'00000000 */ 0x02, 0x00}, .expected_size = 2},
-                           {.addr = AD8400_AD8402_AD8403_RDAC4, .data = 0, /*  */ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______11'00000000 */ 0x03, 0x00}, .expected_size = 2},
-                           {.addr = 255, /*                  */ .data = 0, /*  */ .expected_ret = AD8400_AD8402_AD8403_EINVAL},
-                           {.addr = AD8400_AD8402_AD8403_RDAC1, .data = 128, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______00'10000000 */ 0x00, 0x80}, .expected_size = 2},
-                           {.addr = AD8400_AD8402_AD8403_RDAC2, .data = 128, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______01'10000000 */ 0x01, 0x80}, .expected_size = 2},
-                           {.addr = AD8400_AD8402_AD8403_RDAC3, .data = 128, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______10'10000000 */ 0x02, 0x80}, .expected_size = 2},
-                           {.addr = AD8400_AD8402_AD8403_RDAC4, .data = 128, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______11'10000000 */ 0x03, 0x80}, .expected_size = 2},
-                           {.addr = 255, /*                  */ .data = 128, /**/ .expected_ret = AD8400_AD8402_AD8403_EINVAL},
-                           {.addr = AD8400_AD8402_AD8403_RDAC1, .data = 255, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______00'11111111 */ 0x00, 0xFF}, .expected_size = 2},
-                           {.addr = AD8400_AD8402_AD8403_RDAC2, .data = 255, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______01'11111111 */ 0x01, 0xFF}, .expected_size = 2},
-                           {.addr = AD8400_AD8402_AD8403_RDAC3, .data = 255, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______10'11111111 */ 0x02, 0xFF}, .expected_size = 2},
-                           {.addr = AD8400_AD8402_AD8403_RDAC4, .data = 255, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______11'11111111 */ 0x03, 0xFF}, .expected_size = 2},
-                           {.addr = 255, /*                  */ .data = 255, /**/ .expected_ret = AD8400_AD8402_AD8403_EINVAL}};
-    size_t size = sizeof(cases) / sizeof(test_case_t);
+    TestCase cases[] = {{.data = 0, /*  */ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______00'00000000 */ 0x00, 0x00}, .expected_size = 2},
+                        {.data = 128, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______00'10000000 */ 0x00, 0x80}, .expected_size = 2},
+                        {.data = 255, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______00'11111111 */ 0x00, 0xFF}, .expected_size = 2}};
 
-    for (size_t i = 0; i < size; i++)
+    TEST_FOR(cases)
     {
-        test_case_t case_ = cases[i];
+        AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403_null = NULL;
+        AD8400_AD8402_AD8403ErrNo actual_ret = ad8400_ad8402_ad8403_set_rdac1(NULL, case_.data);
+        TEST_ASSERT_EQUAL_AD8400_AD8402_AD8403_ERROR_RET(AD8400_AD8402_AD8403_EINVAL, actual_ret);
 
-        ad8400_ad8402_ad8403_t ad8400_ad8402_ad8403;
-        test_spi_writer_t writer;
+        AD8400_AD8402_AD8403 ad8400_ad8402_ad8403;
+        TestSPIWriter writer;
         test_spi_writer_init(&writer);
-        ad8400_ad8402_ad8403_gpio_t shdn;
-        shdn.set_high = test_null_gpio_set;
-        shdn.set_low = test_null_gpio_set;
-        assert(ad8400_ad8402_ad8403_init(&ad8400_ad8402_ad8403, (ad8400_ad8402_ad8403_spi_writer_t *)&writer, (ad8400_ad8402_ad8403_gpio_t *)&shdn) == AD8400_AD8402_AD8403_OK);
+        TestGPIO shdn;
+        test_gpio_init(&shdn);
+        assert(ad8400_ad8402_ad8403_init(&ad8400_ad8402_ad8403, (AD8400_AD8402_AD8403SPIWriter *)&writer, (AD8400_AD8402_AD8403GPIO *)&shdn) == AD8400_AD8402_AD8403_OK);
 
-        ad8400_ad8402_ad8403_error_t actual_ret = ad8400_ad8402_ad8403_set(&ad8400_ad8402_ad8403, case_.addr, case_.data);
-        if (case_.expected_ret != actual_ret)
-        {
-            fprintf(stderr, "index: %d, expected_ret: %s, actual_ret: %s\n",
-                    i, TEST_AD8400_AD8402_AD8403_ERROR(case_.expected_ret), TEST_AD8400_AD8402_AD8403_ERROR(actual_ret));
-            cnt++;
-            continue;
-        }
+        actual_ret = ad8400_ad8402_ad8403_set_rdac1(&ad8400_ad8402_ad8403, case_.data);
+        TEST_ASSERT_EQUAL_AD8400_AD8402_AD8403_ERROR_RET(case_.expected_ret, actual_ret);
         if (actual_ret != AD8400_AD8402_AD8403_OK)
         {
             continue;
         }
 
+        uint8_t *actual_data = writer.last_data;
         size_t actual_size = writer.last_size;
-        if (case_.expected_size != actual_size)
+        TEST_ASSERT_EQUAL_SPI_WRITTEN(case_.expected_data, case_.expected_size, actual_data, actual_size);
+    }
+
+    return cnt;
+}
+
+int test_set_rdac2(void)
+{
+    printf("* %s\n", __func__);
+    int cnt = 0;
+
+    typedef struct TestCase
+    {
+        uint8_t data;
+
+        AD8400_AD8402_AD8403ErrNo expected_ret;
+        uint8_t *expected_data;
+        size_t expected_size;
+    } TestCase;
+
+    TestCase cases[] = {{.data = 0, /*  */ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______01'00000000 */ 0x01, 0x00}, .expected_size = 2},
+                        {.data = 128, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______01'10000000 */ 0x01, 0x80}, .expected_size = 2},
+                        {.data = 255, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______01'11111111 */ 0x01, 0xFF}, .expected_size = 2}};
+
+    TEST_FOR(cases)
+    {
+        AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403_null = NULL;
+        AD8400_AD8402_AD8403ErrNo actual_ret = ad8400_ad8402_ad8403_set_rdac2(NULL, case_.data);
+        TEST_ASSERT_EQUAL_AD8400_AD8402_AD8403_ERROR_RET(AD8400_AD8402_AD8403_EINVAL, actual_ret);
+
+        AD8400_AD8402_AD8403 ad8400_ad8402_ad8403;
+        TestSPIWriter writer;
+        test_spi_writer_init(&writer);
+        TestGPIO shdn;
+        test_gpio_init(&shdn);
+        assert(ad8400_ad8402_ad8403_init(&ad8400_ad8402_ad8403, (AD8400_AD8402_AD8403SPIWriter *)&writer, (AD8400_AD8402_AD8403GPIO *)&shdn) == AD8400_AD8402_AD8403_OK);
+
+        actual_ret = ad8400_ad8402_ad8403_set_rdac2(&ad8400_ad8402_ad8403, case_.data);
+        TEST_ASSERT_EQUAL_AD8400_AD8402_AD8403_ERROR_RET(case_.expected_ret, actual_ret);
+        if (actual_ret != AD8400_AD8402_AD8403_OK)
         {
-            fprintf(stderr, "index: %d, expected_size: %d, actual_size: %d\n",
-                    i, case_.expected_size, actual_size);
-            cnt++;
             continue;
         }
 
         uint8_t *actual_data = writer.last_data;
-        if (!test_spi_data_equals(case_.expected_data, actual_data, actual_size))
+        size_t actual_size = writer.last_size;
+        TEST_ASSERT_EQUAL_SPI_WRITTEN(case_.expected_data, case_.expected_size, actual_data, actual_size);
+    }
+
+    return cnt;
+}
+
+int test_set_rdac3(void)
+{
+    printf("* %s\n", __func__);
+    int cnt = 0;
+
+    typedef struct TestCase
+    {
+        uint8_t data;
+
+        AD8400_AD8402_AD8403ErrNo expected_ret;
+        uint8_t *expected_data;
+        size_t expected_size;
+    } TestCase;
+
+    TestCase cases[] = {{.data = 0, /*  */ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______10'00000000 */ 0x02, 0x00}, .expected_size = 2},
+                        {.data = 128, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______10'10000000 */ 0x02, 0x80}, .expected_size = 2},
+                        {.data = 255, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______10'11111111 */ 0x02, 0xFF}, .expected_size = 2}};
+
+    TEST_FOR(cases)
+    {
+        AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403_null = NULL;
+        AD8400_AD8402_AD8403ErrNo actual_ret = ad8400_ad8402_ad8403_set_rdac3(NULL, case_.data);
+        TEST_ASSERT_EQUAL_AD8400_AD8402_AD8403_ERROR_RET(AD8400_AD8402_AD8403_EINVAL, actual_ret);
+
+        AD8400_AD8402_AD8403 ad8400_ad8402_ad8403;
+        TestSPIWriter writer;
+        test_spi_writer_init(&writer);
+        TestGPIO shdn;
+        test_gpio_init(&shdn);
+        assert(ad8400_ad8402_ad8403_init(&ad8400_ad8402_ad8403, (AD8400_AD8402_AD8403SPIWriter *)&writer, (AD8400_AD8402_AD8403GPIO *)&shdn) == AD8400_AD8402_AD8403_OK);
+
+        actual_ret = ad8400_ad8402_ad8403_set_rdac3(&ad8400_ad8402_ad8403, case_.data);
+        TEST_ASSERT_EQUAL_AD8400_AD8402_AD8403_ERROR_RET(case_.expected_ret, actual_ret);
+        if (actual_ret != AD8400_AD8402_AD8403_OK)
         {
-            fprintf(stderr, "index: %d,\n", i);
-            for (size_t j = 0; j < actual_size; j++)
-            {
-                if (case_.expected_data[j] != actual_data[j])
-                {
-                    fprintf(stderr, "  expected_data[%d]: %d, actual_data[%d]: %d\n",
-                            j, case_.expected_data[j], j, actual_data[j]);
-                }
-            }
-            cnt++;
             continue;
         }
+
+        uint8_t *actual_data = writer.last_data;
+        size_t actual_size = writer.last_size;
+        TEST_ASSERT_EQUAL_SPI_WRITTEN(case_.expected_data, case_.expected_size, actual_data, actual_size);
+    }
+
+    return cnt;
+}
+
+int test_set_rdac4(void)
+{
+    printf("* %s\n", __func__);
+    int cnt = 0;
+
+    typedef struct TestCase
+    {
+        uint8_t data;
+
+        AD8400_AD8402_AD8403ErrNo expected_ret;
+        uint8_t *expected_data;
+        size_t expected_size;
+    } TestCase;
+
+    TestCase cases[] = {{.data = 0, /*  */ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______11'00000000 */ 0x03, 0x00}, .expected_size = 2},
+                        {.data = 128, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______11'10000000 */ 0x03, 0x80}, .expected_size = 2},
+                        {.data = 255, /**/ .expected_ret = AD8400_AD8402_AD8403_OK, .expected_data = (uint8_t[]){/* 0b______11'11111111 */ 0x03, 0xFF}, .expected_size = 2}};
+
+    TEST_FOR(cases)
+    {
+        AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403_null = NULL;
+        AD8400_AD8402_AD8403ErrNo actual_ret = ad8400_ad8402_ad8403_set_rdac4(NULL, case_.data);
+        TEST_ASSERT_EQUAL_AD8400_AD8402_AD8403_ERROR_RET(AD8400_AD8402_AD8403_EINVAL, actual_ret);
+
+        AD8400_AD8402_AD8403 ad8400_ad8402_ad8403;
+        TestSPIWriter writer;
+        test_spi_writer_init(&writer);
+        TestGPIO shdn;
+        test_gpio_init(&shdn);
+        assert(ad8400_ad8402_ad8403_init(&ad8400_ad8402_ad8403, (AD8400_AD8402_AD8403SPIWriter *)&writer, (AD8400_AD8402_AD8403GPIO *)&shdn) == AD8400_AD8402_AD8403_OK);
+
+        actual_ret = ad8400_ad8402_ad8403_set_rdac4(&ad8400_ad8402_ad8403, case_.data);
+        TEST_ASSERT_EQUAL_AD8400_AD8402_AD8403_ERROR_RET(case_.expected_ret, actual_ret);
+        if (actual_ret != AD8400_AD8402_AD8403_OK)
+        {
+            continue;
+        }
+
+        uint8_t *actual_data = writer.last_data;
+        size_t actual_size = writer.last_size;
+        TEST_ASSERT_EQUAL_SPI_WRITTEN(case_.expected_data, case_.expected_size, actual_data, actual_size);
     }
 
     return cnt;
@@ -162,41 +248,52 @@ int test_set(void)
 
 int test_enter_shutdown_mode(void)
 {
+    printf("* %s\n", __func__);
     int cnt = 0;
 
-    // Nothing is expected to happen.
-    assert(ad8400_ad8402_ad8403_enter_shutdown_mode(NULL) == AD8400_AD8402_AD8403_EINVAL);
-
-    ad8400_ad8402_ad8403_error_t expected_ret = AD8400_AD8402_AD8403_OK;
-    test_gpio_state_t expected_state = TEST_GPIO_LOW;
-
-    ad8400_ad8402_ad8403_t ad8400_ad8402_ad8403;
-    ad8400_ad8402_ad8403_spi_writer_t writer;
-    writer.write = test_null_spi_writer_write;
-    test_gpio_t shdn;
-    test_gpio_init(&shdn);
-    assert(ad8400_ad8402_ad8403_init(&ad8400_ad8402_ad8403, (ad8400_ad8402_ad8403_spi_writer_t *)&writer, (ad8400_ad8402_ad8403_gpio_t *)&shdn) == AD8400_AD8402_AD8403_OK);
-
-    ad8400_ad8402_ad8403_error_t actual_ret = ad8400_ad8402_ad8403_enter_shutdown_mode(&ad8400_ad8402_ad8403);
-    if (expected_ret != actual_ret)
+    typedef struct TestCase
     {
-        fprintf(stderr, "index: %d, expected_ret: %s, actual_ret: %s\n",
-                0, TEST_AD8400_AD8402_AD8403_ERROR(expected_ret), TEST_AD8400_AD8402_AD8403_ERROR(actual_ret));
-        cnt++;
-        return cnt;
-    }
-    if (actual_ret != AD8400_AD8402_AD8403_OK)
-    {
-        return cnt;
-    }
+        AD8400_AD8402_AD8403ErrNo expected_ret;
+        TestGPIOState expected_state;
+    } TestCase;
 
-    test_gpio_state_t actual_state = shdn.state;
-    if (expected_state != actual_state)
+    TestCase cases[] = {{.expected_ret = AD8400_AD8402_AD8403_OK, .expected_state = TEST_GPIO_LOW}};
+
+    TEST_FOR(cases)
     {
-        fprintf(stderr, "index: %d, expected_state: %s, actual_state: %s\n",
-                0, TEST_GPIO_STATE(expected_state), TEST_GPIO_STATE(actual_state));
-        cnt++;
-        return cnt;
+        AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403_null = NULL;
+        AD8400_AD8402_AD8403ErrNo actual_ret = ad8400_ad8402_ad8403_enter_shutdown_mode(NULL);
+        TEST_ASSERT_EQUAL_AD8400_AD8402_AD8403_ERROR_RET(AD8400_AD8402_AD8403_EINVAL, actual_ret);
+
+        AD8400_AD8402_AD8403 ad8400_ad8402_ad8403_shdn_null;
+        TestSPIWriter writer_shdn_null;
+        test_spi_writer_init(&writer_shdn_null);
+        assert(ad8400_ad8402_ad8403_init(&ad8400_ad8402_ad8403_shdn_null, (AD8400_AD8402_AD8403SPIWriter *)&writer_shdn_null, NULL) == AD8400_AD8402_AD8403_OK);
+        actual_ret = ad8400_ad8402_ad8403_enter_shutdown_mode(&ad8400_ad8402_ad8403_shdn_null);
+        TEST_ASSERT_EQUAL_AD8400_AD8402_AD8403_ERROR_RET(AD8400_AD8402_AD8403_OK, actual_ret);
+
+        AD8400_AD8402_AD8403 ad8400_ad8402_ad8403;
+        TestSPIWriter writer;
+        test_spi_writer_init(&writer);
+        TestGPIO shdn;
+        test_gpio_init(&shdn);
+        assert(ad8400_ad8402_ad8403_init(&ad8400_ad8402_ad8403, (AD8400_AD8402_AD8403SPIWriter *)&writer, (AD8400_AD8402_AD8403GPIO *)&shdn) == AD8400_AD8402_AD8403_OK);
+
+        actual_ret = ad8400_ad8402_ad8403_enter_shutdown_mode(&ad8400_ad8402_ad8403);
+        TEST_ASSERT_EQUAL_AD8400_AD8402_AD8403_ERROR_RET(case_.expected_ret, actual_ret);
+        if (actual_ret != AD8400_AD8402_AD8403_OK)
+        {
+            continue;
+        }
+
+        TestGPIOState actual_state = shdn.state;
+        if (case_.expected_state != actual_state)
+        {
+            fprintf(stderr, "index: %d, expected_state: %s, actual_state: %s\n",
+                    0, TEST_GPIO_STATE(case_.expected_state), TEST_GPIO_STATE(actual_state));
+            cnt++;
+            return cnt;
+        }
     }
 
     return cnt;
@@ -204,41 +301,52 @@ int test_enter_shutdown_mode(void)
 
 int test_enter_operational_mode(void)
 {
+    printf("* %s\n", __func__);
     int cnt = 0;
 
-    // Nothing is expected to happen.
-    assert(ad8400_ad8402_ad8403_enter_operational_mode(NULL) == AD8400_AD8402_AD8403_EINVAL);
-
-    ad8400_ad8402_ad8403_error_t expected_ret = AD8400_AD8402_AD8403_OK;
-    test_gpio_state_t expected_state = TEST_GPIO_HIGH;
-
-    ad8400_ad8402_ad8403_t ad8400_ad8402_ad8403;
-    ad8400_ad8402_ad8403_spi_writer_t writer;
-    writer.write = test_null_spi_writer_write;
-    test_gpio_t shdn;
-    test_gpio_init(&shdn);
-    assert(ad8400_ad8402_ad8403_init(&ad8400_ad8402_ad8403, (ad8400_ad8402_ad8403_spi_writer_t *)&writer, (ad8400_ad8402_ad8403_gpio_t *)&shdn) == AD8400_AD8402_AD8403_OK);
-
-    ad8400_ad8402_ad8403_error_t actual_ret = ad8400_ad8402_ad8403_enter_operational_mode(&ad8400_ad8402_ad8403);
-    if (expected_ret != actual_ret)
+    typedef struct TestCase
     {
-        fprintf(stderr, "index: %d, expected_ret: %s, actual_ret: %s\n",
-                0, TEST_AD8400_AD8402_AD8403_ERROR(expected_ret), TEST_AD8400_AD8402_AD8403_ERROR(actual_ret));
-        cnt++;
-        return cnt;
-    }
-    if (actual_ret != AD8400_AD8402_AD8403_OK)
-    {
-        return cnt;
-    }
+        AD8400_AD8402_AD8403ErrNo expected_ret;
+        TestGPIOState expected_state;
+    } TestCase;
 
-    test_gpio_state_t actual_state = shdn.state;
-    if (expected_state != actual_state)
+    TestCase cases[] = {{.expected_ret = AD8400_AD8402_AD8403_OK, .expected_state = TEST_GPIO_HIGH}};
+
+    TEST_FOR(cases)
     {
-        fprintf(stderr, "index: %d, expected_state: %s, actual_state: %s\n",
-                0, TEST_GPIO_STATE(expected_state), TEST_GPIO_STATE(actual_state));
-        cnt++;
-        return cnt;
+        AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403_null = NULL;
+        AD8400_AD8402_AD8403ErrNo actual_ret = ad8400_ad8402_ad8403_enter_operational_mode(NULL);
+        TEST_ASSERT_EQUAL_AD8400_AD8402_AD8403_ERROR_RET(AD8400_AD8402_AD8403_EINVAL, actual_ret);
+
+        AD8400_AD8402_AD8403 ad8400_ad8402_ad8403_shdn_null;
+        TestSPIWriter writer_shdn_null;
+        test_spi_writer_init(&writer_shdn_null);
+        assert(ad8400_ad8402_ad8403_init(&ad8400_ad8402_ad8403_shdn_null, (AD8400_AD8402_AD8403SPIWriter *)&writer_shdn_null, NULL) == AD8400_AD8402_AD8403_OK);
+        actual_ret = ad8400_ad8402_ad8403_enter_operational_mode(&ad8400_ad8402_ad8403_shdn_null);
+        TEST_ASSERT_EQUAL_AD8400_AD8402_AD8403_ERROR_RET(AD8400_AD8402_AD8403_OK, actual_ret);
+
+        AD8400_AD8402_AD8403 ad8400_ad8402_ad8403;
+        TestSPIWriter writer;
+        test_spi_writer_init(&writer);
+        TestGPIO shdn;
+        test_gpio_init(&shdn);
+        assert(ad8400_ad8402_ad8403_init(&ad8400_ad8402_ad8403, (AD8400_AD8402_AD8403SPIWriter *)&writer, (AD8400_AD8402_AD8403GPIO *)&shdn) == AD8400_AD8402_AD8403_OK);
+
+        actual_ret = ad8400_ad8402_ad8403_enter_operational_mode(&ad8400_ad8402_ad8403);
+        TEST_ASSERT_EQUAL_AD8400_AD8402_AD8403_ERROR_RET(case_.expected_ret, actual_ret);
+        if (actual_ret != AD8400_AD8402_AD8403_OK)
+        {
+            continue;
+        }
+
+        TestGPIOState actual_state = shdn.state;
+        if (case_.expected_state != actual_state)
+        {
+            fprintf(stderr, "index: %d, expected_state: %s, actual_state: %s\n",
+                    0, TEST_GPIO_STATE(case_.expected_state), TEST_GPIO_STATE(actual_state));
+            cnt++;
+            return cnt;
+        }
     }
 
     return cnt;
@@ -248,13 +356,12 @@ int main(void)
 {
     int cnt = 0;
 
-    printf("* test_init\n");
     cnt += test_init();
-    printf("* test_set\n");
-    cnt += test_set();
-    printf("* test_enter_shutdown_mode\n");
+    cnt += test_set_rdac1();
+    cnt += test_set_rdac2();
+    cnt += test_set_rdac3();
+    cnt += test_set_rdac4();
     cnt += test_enter_shutdown_mode();
-    printf("* test_enter_operational_mode\n");
     cnt += test_enter_operational_mode();
 
     if (cnt == 0)

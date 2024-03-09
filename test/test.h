@@ -6,29 +6,38 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#define TEST_AD8400_AD8402_AD8403_ERROR(err) ((err) == AD8400_AD8402_AD8403_EINVAL ? "AD8400_AD8402_AD8403_EINVAL" \
-                                                                                   : "AD8400_AD8402_AD8403_OK")
+#define TEST_FOR(cases) \
+    TestCase case_;     \
+    for (size_t i = 0; case_ = (cases)[i], i < sizeof((cases)) / sizeof(TestCase); i++)
 
-ad8400_ad8402_ad8403_error_t test_null_spi_writer_write(ad8400_ad8402_ad8403_spi_writer_t *writer, uint8_t data[], size_t size)
-{
-    assert(writer != NULL);
-    return AD8400_AD8402_AD8403_OK;
-}
+#define TEST_AD8400_AD8402_AD8403_ERROR(e) ((e) == AD8400_AD8402_AD8403_OK       ? "AD8400_AD8402_AD8403_OK"     \
+                                            : (e) == AD8400_AD8402_AD8403_EIO    ? "AD8400_AD8402_AD8403_EIO"    \
+                                            : (e) == AD8400_AD8402_AD8403_EINVAL ? "AD8400_AD8402_AD8403_EINVAL" \
+                                                                                 : "")
+
+#define TEST_ASSERT_EQUAL_AD8400_AD8402_AD8403_ERROR_RET(expected_ret, actual_ret)                                  \
+    if ((expected_ret) != (actual_ret))                                                                             \
+    {                                                                                                               \
+        fprintf(stderr, "index: %d, expected_ret: %s, actual_ret: %s\n",                                            \
+                i, TEST_AD8400_AD8402_AD8403_ERROR((expected_ret)), TEST_AD8400_AD8402_AD8403_ERROR((actual_ret))); \
+        cnt++;                                                                                                      \
+        continue;                                                                                                   \
+    }
 
 #define TEST_SPI_SIZE ((size_t)8)
 
-typedef struct test_spi_writer_t
+typedef struct TestSPIWriter
 {
-    ad8400_ad8402_ad8403_spi_writer_t parent;
+    AD8400_AD8402_AD8403SPIWriter parent;
     uint8_t last_data[TEST_SPI_SIZE];
     size_t last_size;
-} test_spi_writer_t;
+} TestSPIWriter;
 
-ad8400_ad8402_ad8403_error_t test_spi_writer_write(ad8400_ad8402_ad8403_spi_writer_t *parent, uint8_t data[], size_t size)
+AD8400_AD8402_AD8403ErrNo test_spi_writer_write(AD8400_AD8402_AD8403SPIWriter *parent, uint8_t data[], size_t size)
 {
     assert(parent != NULL);
     assert(size < TEST_SPI_SIZE);
-    test_spi_writer_t *writer = (test_spi_writer_t *)parent;
+    TestSPIWriter *writer = (TestSPIWriter *)parent;
     for (size_t i = 0; i < size; i++)
     {
         writer->last_data[i] = data[i];
@@ -53,38 +62,55 @@ bool test_spi_data_equals(uint8_t arr0[], uint8_t arr1[], size_t size)
     return true;
 }
 
-ad8400_ad8402_ad8403_error_t test_null_gpio_set(ad8400_ad8402_ad8403_gpio_t *gpio)
-{
-    assert(gpio != NULL);
-    return AD8400_AD8402_AD8403_OK;
-}
+#define TEST_ASSERT_EQUAL_SPI_WRITTEN(expected_data, expected_size, actual_data, actual_size) \
+    if ((expected_size) != (actual_size))                                                     \
+    {                                                                                         \
+        fprintf(stderr, "index: %d, expected_size: %d, actual_size: %d\n",                    \
+                i, (expected_size), (actual_size));                                           \
+        cnt++;                                                                                \
+        continue;                                                                             \
+    }                                                                                         \
+    if (!test_spi_data_equals((expected_data), (actual_data), (actual_size)))                 \
+    {                                                                                         \
+        fprintf(stderr, "index: %d,\n", i);                                                   \
+        for (size_t j = 0; j < (actual_size); j++)                                            \
+        {                                                                                     \
+            if ((expected_data)[j] != (actual_data)[j])                                       \
+            {                                                                                 \
+                fprintf(stderr, "  expected_data[%d]: %d, actual_data[%d]: %d\n",             \
+                        j, (expected_data)[j], j, (actual_data)[j]);                          \
+            }                                                                                 \
+        }                                                                                     \
+        cnt++;                                                                                \
+        continue;                                                                             \
+    }
 
-typedef enum test_gpio_state_t
+typedef enum TestGPIOState
 {
     TEST_GPIO_HIGH,
     TEST_GPIO_LOW,
-} test_gpio_state_t;
+} TestGPIOState;
 
 #define TEST_GPIO_STATE(state) ((state) == TEST_GPIO_HIGH ? "TEST_GPIO_HIGH" \
                                                           : "TEST_GPIO_LOW")
 
-typedef struct test_gpio_t
+typedef struct TestGPIO
 {
-    ad8400_ad8402_ad8403_gpio_t parent;
-    test_gpio_state_t state;
-} test_gpio_t;
+    AD8400_AD8402_AD8403GPIO parent;
+    TestGPIOState state;
+} TestGPIO;
 
-ad8400_ad8402_ad8403_error_t test_gpio_set_high(ad8400_ad8402_ad8403_gpio_t *gpio)
+AD8400_AD8402_AD8403ErrNo test_gpio_set_high(AD8400_AD8402_AD8403GPIO *gpio)
 {
     assert(gpio != NULL);
-    ((test_gpio_t *)gpio)->state = TEST_GPIO_HIGH;
+    ((TestGPIO *)gpio)->state = TEST_GPIO_HIGH;
     return AD8400_AD8402_AD8403_OK;
 }
 
-ad8400_ad8402_ad8403_error_t test_gpio_set_low(ad8400_ad8402_ad8403_gpio_t *gpio)
+AD8400_AD8402_AD8403ErrNo test_gpio_set_low(AD8400_AD8402_AD8403GPIO *gpio)
 {
     assert(gpio != NULL);
-    ((test_gpio_t *)gpio)->state = TEST_GPIO_LOW;
+    ((TestGPIO *)gpio)->state = TEST_GPIO_LOW;
     return AD8400_AD8402_AD8403_OK;
 }
 
