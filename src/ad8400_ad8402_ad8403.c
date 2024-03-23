@@ -29,10 +29,10 @@ static errno_t ad8400_ad8402_ad8403_set(AD8400_AD8402_AD8403 *ad8400_ad8402_ad84
     }
     assert(ad8400_ad8402_ad8403->writer != NULL);
 
-    errno_t err = ad8400_ad8402_ad8403->writer->write(ad8400_ad8402_ad8403->writer,
-                                                      (uint8_t[]){(uint8_t)addr,
-                                                                  data},
-                                                      2);
+    errno_t err = ad8400_ad8402_ad8403_spi_writer_write(ad8400_ad8402_ad8403->writer,
+                                                        (uint8_t[]){(uint8_t)addr,
+                                                                    data},
+                                                        2);
     if (err != 0)
     {
         return EIO;
@@ -72,7 +72,7 @@ errno_t ad8400_ad8402_ad8403_enter_shutdown_mode(AD8400_AD8402_AD8403 *ad8400_ad
         return 0;
     }
 
-    errno_t err = ad8400_ad8402_ad8403->shdn->set_low(ad8400_ad8402_ad8403->shdn);
+    errno_t err = ad8400_ad8402_ad8403_gpio_set_low(ad8400_ad8402_ad8403->shdn);
     if (err != 0)
     {
         return EIO;
@@ -92,7 +92,7 @@ errno_t ad8400_ad8402_ad8403_enter_operational_mode(AD8400_AD8402_AD8403 *ad8400
         return 0;
     }
 
-    errno_t err = ad8400_ad8402_ad8403->shdn->set_high(ad8400_ad8402_ad8403->shdn);
+    errno_t err = ad8400_ad8402_ad8403_gpio_set_high(ad8400_ad8402_ad8403->shdn);
     if (err != 0)
     {
         return EIO;
