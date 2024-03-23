@@ -8,6 +8,8 @@
 #include <Arduino.h>
 #include <SPI.h>
 
+#include <assert.h>
+
 class AD8400_AD8402_AD8403Wrapper
 {
 public:
