@@ -1,29 +1,31 @@
-#ifndef AD8400_AD8402_AD8403_H_
-#define AD8400_AD8402_AD8403_H_
+#ifndef AD8400_AD8402_AD8403_H
+#define AD8400_AD8402_AD8403_H
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
+#ifndef __STDC_WANT_LIB_EXT1__
+#define __STDC_WANT_LIB_EXT1__ 1
+#endif
+
+#include <errno.h>
+#ifndef __STDC_LIB_EXT1__
+    typedef int errno_t;
+#endif
 #include <stddef.h>
 #include <stdint.h>
 
-    typedef int AD8400_AD8402_AD8403ErrNo;
-
-#define AD8400_AD8402_AD8403_OK /*    */ ((AD8400_AD8402_AD8403ErrNo)0)
-#define AD8400_AD8402_AD8403_EIO /*   */ ((AD8400_AD8402_AD8403ErrNo)5)
-#define AD8400_AD8402_AD8403_EINVAL /**/ ((AD8400_AD8402_AD8403ErrNo)22)
-
     typedef struct AD8400_AD8402_AD8403SPIWriter
     {
-        AD8400_AD8402_AD8403ErrNo (*write)(struct AD8400_AD8402_AD8403SPIWriter *writer, uint8_t data[], size_t size);
+        errno_t (*write)(struct AD8400_AD8402_AD8403SPIWriter *writer, uint8_t data[], size_t size);
     } AD8400_AD8402_AD8403SPIWriter;
 
     typedef struct AD8400_AD8402_AD8403GPIO
     {
-        AD8400_AD8402_AD8403ErrNo (*set_high)(struct AD8400_AD8402_AD8403GPIO *gpio);
-        AD8400_AD8402_AD8403ErrNo (*set_low)(struct AD8400_AD8402_AD8403GPIO *gpio);
+        errno_t (*set_high)(struct AD8400_AD8402_AD8403GPIO *gpio);
+        errno_t (*set_low)(struct AD8400_AD8402_AD8403GPIO *gpio);
     } AD8400_AD8402_AD8403GPIO;
 
     typedef struct AD8400_AD8402_AD8403
@@ -32,16 +34,16 @@ extern "C"
         AD8400_AD8402_AD8403GPIO *shdn;
     } AD8400_AD8402_AD8403;
 
-    AD8400_AD8402_AD8403ErrNo ad8400_ad8402_ad8403_init(AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403, AD8400_AD8402_AD8403SPIWriter *writer, AD8400_AD8402_AD8403GPIO *shdn);
-    AD8400_AD8402_AD8403ErrNo ad8400_ad8402_ad8403_set_rdac1(AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403, uint8_t data);
-    AD8400_AD8402_AD8403ErrNo ad8400_ad8402_ad8403_set_rdac2(AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403, uint8_t data);
-    AD8400_AD8402_AD8403ErrNo ad8400_ad8402_ad8403_set_rdac3(AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403, uint8_t data);
-    AD8400_AD8402_AD8403ErrNo ad8400_ad8402_ad8403_set_rdac4(AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403, uint8_t data);
-    AD8400_AD8402_AD8403ErrNo ad8400_ad8402_ad8403_enter_shutdown_mode(AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403);
-    AD8400_AD8402_AD8403ErrNo ad8400_ad8402_ad8403_enter_operational_mode(AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403);
+    errno_t ad8400_ad8402_ad8403_init(AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403, AD8400_AD8402_AD8403SPIWriter *writer, AD8400_AD8402_AD8403GPIO *shdn);
+    errno_t ad8400_ad8402_ad8403_set_rdac1(AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403, uint8_t data);
+    errno_t ad8400_ad8402_ad8403_set_rdac2(AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403, uint8_t data);
+    errno_t ad8400_ad8402_ad8403_set_rdac3(AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403, uint8_t data);
+    errno_t ad8400_ad8402_ad8403_set_rdac4(AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403, uint8_t data);
+    errno_t ad8400_ad8402_ad8403_enter_shutdown_mode(AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403);
+    errno_t ad8400_ad8402_ad8403_enter_operational_mode(AD8400_AD8402_AD8403 *ad8400_ad8402_ad8403);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // AD8400_AD8402_AD8403_H_
+#endif // AD8400_AD8402_AD8403_H
